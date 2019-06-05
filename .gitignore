@@ -1,0 +1,13 @@
+# IDE files
+.idea/
+*.iml
+bin/
+target/
+build/
+
+# Misc
+.DS_Store
+*.swp
+/*.log
+.gradle/
+
