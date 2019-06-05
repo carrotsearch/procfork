@@ -17,6 +17,8 @@ def currentVersion = '1.0.0-SNAPSHOT'
 ext {
   gitRev = gitStatus.id
 
+  licenseHeader = file('etc/license-header.txt')
+
   replaceTokens = [
     'version': currentVersion,
     'gitRev': gitRev,
@@ -49,8 +51,12 @@ allprojects {
   apply plugin: 'java'
   apply plugin: 'com.diffplug.gradle.spotless'
 
-  sourceCompatibility = 9
-  targetCompatibility = 9
+  sourceCompatibility = 1.9
+  targetCompatibility = 1.9
+
+  dependencies {
+    testImplementation "com.carrotsearch.randomizedtesting:randomizedtesting-runner"
+  }
 
   spotless {
     java {
