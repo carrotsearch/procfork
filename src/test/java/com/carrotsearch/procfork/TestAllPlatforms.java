@@ -1,11 +1,14 @@
+/*
+ * procfork
+ *
+ * Copyright (C) 2019, Dawid Weiss.
+ * All rights reserved.
+ */
 package com.carrotsearch.procfork;
 
 import com.carrotsearch.randomizedtesting.MixWithSuiteName;
 import com.carrotsearch.randomizedtesting.annotations.*;
 import com.google.common.base.Stopwatch;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -13,8 +16,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
 
-@TimeoutSuite(millis = 180 * 1000) // No suite should run longer than 180 seconds.
+@TimeoutSuite(millis = 60 * 1000)
 @ThreadLeakGroup(ThreadLeakGroup.Group.MAIN)
 @ThreadLeakScope(ThreadLeakScope.Scope.TEST)
 @ThreadLeakZombies(ThreadLeakZombies.Consequence.IGNORE_REMAINING_TESTS)
