@@ -1,3 +1,9 @@
+/*
+ * procfork
+ *
+ * Copyright (C) 2019, Dawid Weiss.
+ * All rights reserved.
+ */
 package com.carrotsearch.procfork;
 
 import java.io.IOException;

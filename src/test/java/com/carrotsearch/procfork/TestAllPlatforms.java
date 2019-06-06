@@ -1,9 +1,12 @@
+/*
+ * procfork
+ *
+ * Copyright (C) 2019, Dawid Weiss.
+ * All rights reserved.
+ */
 package com.carrotsearch.procfork;
 
 import com.google.common.base.Stopwatch;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -11,6 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
 
 public class TestAllPlatforms {
   @Test
