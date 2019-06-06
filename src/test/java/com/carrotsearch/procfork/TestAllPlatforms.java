@@ -55,7 +55,7 @@ public class TestAllPlatforms {
         new ProcessBuilderLauncher()
             .cwd(Paths.get("."))
             .executable(Paths.get("ping"))
-            .args("127.0.0.1", "-n", "5")
+            .args(pingArgs(5))
             .viaShellLauncher()
             .execute()) {
       Thread.sleep(1000);
@@ -66,13 +66,21 @@ public class TestAllPlatforms {
     Assertions.assertThat(output).doesNotExist();
   }
 
+  private String[] pingArgs(int secs) {
+    if (LocalEnvironment.IS_OS_WINDOWS) {
+      return new String[] {"localhost", "-n", Integer.toString(secs)};
+    } else {
+      return new String[] {"localhost", "-c", Integer.toString(secs)};
+    }
+  }
+
   @Test
   public void testOutputStreaming() throws Exception {
     try (ForkedProcess cmd =
         new ProcessBuilderLauncher()
             .cwd(Paths.get("."))
             .executable(Paths.get("ping"))
-            .args("127.0.0.1", "-n", "5")
+            .args(pingArgs(5))
             .viaShellLauncher()
             .execute()) {
       Stopwatch sw = Stopwatch.createStarted();
