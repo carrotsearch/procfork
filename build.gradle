@@ -44,6 +44,11 @@ allprojects {
       testOutputDir file('build/idea/classes/test')
       downloadSources = true
     }
+
+    project {
+      jdkName = '9'
+      languageLevel = '1.9'
+    }
   }
 }
 
@@ -56,6 +61,8 @@ allprojects {
 
   dependencies {
     testImplementation "com.carrotsearch.randomizedtesting:randomizedtesting-runner"
+    testImplementation "org.assertj:assertj-core"
+    testImplementation "com.google.guava:guava"
   }
 
   spotless {

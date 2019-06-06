@@ -2,16 +2,16 @@ package com.carrotsearch.procfork;
 
 import java.util.Objects;
 
-public final class OsDetection {
-  public static final String OS_NAME;
+final class LocalEnvironment {
+  static final String OS_NAME;
 
-  public static final boolean IS_OS_WINDOWS;
-  public static final boolean IS_OS_MAC_OSX;
-  public static final boolean IS_OS_LINUX;
+  static final boolean IS_OS_WINDOWS;
+  static final boolean IS_OS_MAC_OSX;
+  static final boolean IS_OS_LINUX;
 
-  public static final boolean IS_OS_UNIXISH;
+  static final boolean IS_OS_UNIXISH;
 
-  public static final boolean IS_CYGWIN;
+  static final boolean IS_CYGWIN;
 
   static {
     OS_NAME = Objects.requireNonNull(System.getProperty("os.name"));
