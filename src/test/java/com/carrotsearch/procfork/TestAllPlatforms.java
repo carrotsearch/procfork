@@ -39,9 +39,10 @@ public class TestAllPlatforms {
             .execute()) {
 
       Assertions.assertThat(cmd.waitFor()).isEqualTo(0);
-      output = cmd.processOutput();
+      output = cmd.getProcessOutputFile();
 
-      String out = new String(Files.readAllBytes(cmd.processOutput()), Charset.defaultCharset());
+      String out =
+          new String(Files.readAllBytes(cmd.getProcessOutputFile()), Charset.defaultCharset());
       Assertions.assertThat(out).isEqualToIgnoringNewLines("foo bar");
     }
 
@@ -60,7 +61,7 @@ public class TestAllPlatforms {
             .execute()) {
       Thread.sleep(1000);
       cmd.destroyForcibly();
-      output = cmd.processOutput();
+      output = cmd.getProcessOutputFile();
     }
 
     Assertions.assertThat(output).doesNotExist();
@@ -86,7 +87,7 @@ public class TestAllPlatforms {
       Stopwatch sw = Stopwatch.createStarted();
       ArrayList<String> lines = new ArrayList<>();
       try (BufferedReader reader =
-          new BufferedReader(new InputStreamReader(cmd.processOutputAsStream()))) {
+          new BufferedReader(new InputStreamReader(cmd.getProcessOutputAsStream()))) {
         String line;
         while ((line = reader.readLine()) != null && sw.elapsed().getSeconds() < 1) {
           lines.add(line);

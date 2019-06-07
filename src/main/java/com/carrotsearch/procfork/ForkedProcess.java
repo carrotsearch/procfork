@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class ForkedProcess implements Closeable {
@@ -23,44 +25,53 @@ public class ForkedProcess implements Closeable {
     this.processOutput = processOutput;
   }
 
-  public Process process() {
+  public Process getProcess() {
     return p;
   }
 
-  public void destroyForcibly() {
-    ArrayList<ProcessHandle> procList =
-        p.descendants().collect(Collectors.toCollection(ArrayList::new));
-    procList.add(p.toHandle());
+  public List<ProcessHandle> destroyForcibly() {
+    ArrayList<ProcessHandle> procList = getProcessHandles();
 
     for (ProcessHandle ph : procList) {
       if (ph.isAlive()) {
         ph.destroyForcibly();
       }
     }
+
+    return procList;
   }
 
-  public Path processOutput() {
+  public Path getProcessOutputFile() {
     return processOutput;
   }
 
-  public InputStream processOutputAsStream() throws IOException {
+  public InputStream getProcessOutputAsStream() throws IOException {
     return new TailInputStream(processOutput, () -> !p.isAlive());
   }
 
   public int waitFor() throws InterruptedException {
-    return process().waitFor();
+    return getProcess().waitFor();
   }
 
   @Override
   public void close() throws IOException {
-    destroyForcibly();
+    List<ProcessHandle> handles = destroyForcibly();
 
     try {
-      p.waitFor();
-    } catch (InterruptedException e) {
+      for (ProcessHandle handle : handles) {
+        handle.onExit().get();
+      }
+    } catch (ExecutionException | InterruptedException e) {
       throw new IOException(e);
     }
 
     Files.deleteIfExists(processOutput);
+  }
+
+  private ArrayList<ProcessHandle> getProcessHandles() {
+    ArrayList<ProcessHandle> procList =
+        p.descendants().collect(Collectors.toCollection(ArrayList::new));
+    procList.add(p.toHandle());
+    return procList;
   }
 }

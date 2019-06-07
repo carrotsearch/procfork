@@ -102,7 +102,9 @@ public class ProcessBuilderLauncher implements Launcher {
       pb.redirectInput(ProcessBuilder.Redirect.PIPE);
     }
 
-    pb.redirectErrorStream(true); // merge stderr and stdout
+    // merge stderr and stdout
+    pb.redirectErrorStream(true);
+
     Path output = Files.createTempFile("process-", ".out");
     pb.redirectOutput(ProcessBuilder.Redirect.to(output.toFile()));
 
