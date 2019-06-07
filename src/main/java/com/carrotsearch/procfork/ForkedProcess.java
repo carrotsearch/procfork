@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -65,7 +66,26 @@ public class ForkedProcess implements Closeable {
       throw new IOException(e);
     }
 
-    Files.deleteIfExists(processOutput);
+    Instant deadline = Instant.now().plusSeconds(2);
+    try {
+      while (true) {
+        try {
+          Files.deleteIfExists(processOutput);
+          break;
+        } catch (IOException e) {
+          if (Instant.now().isAfter(deadline)) {
+            throw e;
+          } else {
+            // Fall-through.
+          }
+        }
+
+        // Linger a bit before retrying to delete this file.
+        Thread.sleep(250);
+      }
+    } catch (InterruptedException e) {
+      throw new IOException(e);
+    }
   }
 
   private ArrayList<ProcessHandle> getProcessHandles() {
