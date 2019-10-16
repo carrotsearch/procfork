@@ -137,7 +137,7 @@ public class ProcessBuilderLauncher implements Launcher {
         cmd.toString(),
         "-f", // don't glob.
         "-c",
-        executableName() + " \"$@\"",
+        "'" + executableName() + "'" + " \"$@\"",
         executable.getFileName().toString());
   }
 
