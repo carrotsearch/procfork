@@ -6,7 +6,9 @@
  */
 package com.carrotsearch.procfork;
 
+import com.carrotsearch.randomizedtesting.LifecycleScope;
 import com.carrotsearch.randomizedtesting.MixWithSuiteName;
+import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.*;
 import com.google.common.base.Stopwatch;
 import java.io.BufferedReader;
@@ -26,7 +28,34 @@ import org.junit.Test;
 @ThreadLeakLingering(linger = 1000)
 @ThreadLeakAction({ThreadLeakAction.Action.WARN, ThreadLeakAction.Action.INTERRUPT})
 @SeedDecorators({MixWithSuiteName.class})
-public class TestAllPlatforms {
+@ThreadLeakFilters(filters = CustomThreadFilters.class)
+public class TestAllPlatforms extends RandomizedTest {
+  @Test
+  public void testSpaceInPath() throws Exception {
+    Path dir = newTempDir(LifecycleScope.TEST);
+    Path subdir = dir.resolve("sub dir");
+    Files.createDirectories(subdir);
+
+    Path output;
+    try (ForkedProcess cmd =
+        new ProcessBuilderLauncher()
+            .cwd(subdir)
+            .executable(Paths.get("echo"))
+            .args("foo", "bar")
+            .viaShellLauncher()
+            .execute()) {
+
+      Assertions.assertThat(cmd.waitFor()).isEqualTo(0);
+      output = cmd.getProcessOutputFile();
+
+      String out =
+          new String(Files.readAllBytes(cmd.getProcessOutputFile()), Charset.defaultCharset());
+      Assertions.assertThat(out).isEqualToIgnoringNewLines("foo bar");
+    }
+
+    Assertions.assertThat(output).doesNotExist();
+  }
+
   @Test
   public void testEcho() throws Exception {
     Path output;
