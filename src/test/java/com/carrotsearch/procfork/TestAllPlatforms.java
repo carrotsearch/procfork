@@ -14,6 +14,7 @@ import com.google.common.base.Stopwatch;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,12 +37,20 @@ public class TestAllPlatforms extends RandomizedTest {
     Path subdir = dir.resolve("sub dir");
     Files.createDirectories(subdir);
 
+    Path command;
+    if (LocalEnvironment.IS_OS_WINDOWS) {
+      command = subdir.resolve("script.cmd");
+      Files.write(command, "@echo foo bar".getBytes(StandardCharsets.UTF_8));
+    } else {
+      command = subdir.resolve("script.sh");
+      Files.write(command, "echo foo bar".getBytes(StandardCharsets.UTF_8));
+    }
+
     Path output;
     try (ForkedProcess cmd =
         new ProcessBuilderLauncher()
             .cwd(subdir)
-            .executable(Paths.get("echo"))
-            .args("foo", "bar")
+            .executable(command.toAbsolutePath())
             .viaShellLauncher()
             .execute()) {
 
