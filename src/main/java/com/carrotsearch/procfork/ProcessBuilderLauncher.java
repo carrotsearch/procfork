@@ -79,20 +79,21 @@ public class ProcessBuilderLauncher implements Launcher {
       pb.directory(cwd.toFile());
     }
 
-    List<String> command = new ArrayList<>();
+    List<String> command;
     if (executeViaShell) {
       if (LocalEnvironment.IS_OS_WINDOWS) {
-        command.addAll(shellInvokeWindows());
+        command = shellInvokeWindows();
       } else if (LocalEnvironment.IS_OS_UNIXISH) {
-        command.addAll(shellInvokeUnixish());
+        command = shellInvokeUnixish();
       } else {
         throw new RuntimeException("Unsupported operating system: " + LocalEnvironment.OS_NAME);
       }
     } else {
+      command = new ArrayList<>();
       command.add(executableName());
+      command.addAll(args);
     }
 
-    command.addAll(args);
     pb.command(command);
     pb.environment().putAll(envVars);
 
@@ -142,6 +143,7 @@ public class ProcessBuilderLauncher implements Launcher {
   }
 
   protected List<String> shellInvokeWindows() {
+    List<String> command = new ArrayList<>();
     Path cmd = null;
     for (Map.Entry<String, String> e : System.getenv().entrySet()) {
       if (e.getKey().toLowerCase(Locale.ROOT).equals("comspec")) {
@@ -154,7 +156,33 @@ public class ProcessBuilderLauncher implements Launcher {
           "Command line interpreter couldn't be found or is not a file: " + cmd);
     }
 
-    return Arrays.asList(cmd.toString(), "/c", executableName());
+    command.add(cmd.toString());
+
+    /*
+     * cmd. Hopeless.
+     *
+     * mkdir "foo bar"
+     * echo @echo You said: %1 > "foo bar\test.cmd"
+     * cmd /C "foo bar\test.cmd" hello
+     * cmd /C "foo bar\test.cmd" "good morning"
+     */
+
+    // See https://stackoverflow.com/a/356014
+    command.add("/S");
+    command.add("/C");
+    command.add("\"");
+    command.add(executableName());
+
+    if (args.isEmpty()) {
+      command.add("\"");
+    } else {
+      command.addAll(args.subList(0, args.size() - 1));
+      command.add(args.get(args.size() - 1) + "\"");
+    }
+
+    System.out.println(command);
+
+    return command;
   }
 
   private String executableName() {

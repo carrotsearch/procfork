@@ -32,34 +32,78 @@ import org.junit.Test;
 @ThreadLeakFilters(filters = CustomThreadFilters.class)
 public class TestAllPlatforms extends RandomizedTest {
   @Test
-  public void testSpaceInPath() throws Exception {
-    Path dir = newTempDir(LifecycleScope.TEST);
-    Path subdir = dir.resolve("sub dir");
-    Files.createDirectories(subdir);
+  public void testSpaceInPathAndArgument() throws Exception {
+    Path cwdDir = newTempDir(LifecycleScope.TEST).resolve("space (inside)");
+    Files.createDirectories(cwdDir);
+    Path cmdDir = newTempDir(LifecycleScope.TEST).resolve("New Folder (2)");
+    Files.createDirectories(cmdDir);
 
+    String expectedOutput;
     Path command;
     if (LocalEnvironment.IS_OS_WINDOWS) {
-      command = subdir.resolve("script.cmd");
-      Files.write(command, "@echo foo bar".getBytes(StandardCharsets.UTF_8));
+      command = cmdDir.resolve("script.cmd");
+      Files.write(command, "@echo 1=%1 2=%2".getBytes(StandardCharsets.UTF_8));
+      // Quotes added by cmd or echo - they're passed to subprocess properly.
+      expectedOutput = "1=\"one and two\" 2=three";
     } else {
-      command = subdir.resolve("script.sh");
-      Files.write(command, "echo foo bar".getBytes(StandardCharsets.UTF_8));
+      command = cmdDir.resolve("script.sh");
+      Files.write(command, "echo 1=$1 2=$2".getBytes(StandardCharsets.UTF_8));
+      expectedOutput = "1=one and two 2=three";
     }
 
     Path output;
     try (ForkedProcess cmd =
         new ProcessBuilderLauncher()
-            .cwd(subdir)
+            .cwd(cwdDir)
+            .executable(command.toAbsolutePath())
+            .viaShellLauncher()
+            .args("one and two", "three")
+            .execute()) {
+
+      int exitStatus = cmd.waitFor();
+      output = cmd.getProcessOutputFile();
+      String out =
+          new String(Files.readAllBytes(cmd.getProcessOutputFile()), Charset.defaultCharset());
+      Assertions.assertThat(out).isEqualToIgnoringWhitespace(expectedOutput);
+      Assertions.assertThat(exitStatus).isEqualTo(0);
+    }
+
+    Assertions.assertThat(output).doesNotExist();
+  }
+
+  @Test
+  public void testSpaceInPathAndNoArguments() throws Exception {
+    Path cwdDir = newTempDir(LifecycleScope.TEST).resolve("space (inside)");
+    Files.createDirectories(cwdDir);
+    Path cmdDir = newTempDir(LifecycleScope.TEST).resolve("New Folder (2)");
+    Files.createDirectories(cmdDir);
+
+    String expectedOutput;
+    Path command;
+    if (LocalEnvironment.IS_OS_WINDOWS) {
+      command = cmdDir.resolve("script.cmd");
+      Files.write(command, "@echo args: %1".getBytes(StandardCharsets.UTF_8));
+      expectedOutput = "args: ";
+    } else {
+      command = cmdDir.resolve("script.sh");
+      Files.write(command, "echo args: $1".getBytes(StandardCharsets.UTF_8));
+      expectedOutput = "args: ";
+    }
+
+    Path output;
+    try (ForkedProcess cmd =
+        new ProcessBuilderLauncher()
+            .cwd(cwdDir)
             .executable(command.toAbsolutePath())
             .viaShellLauncher()
             .execute()) {
 
-      Assertions.assertThat(cmd.waitFor()).isEqualTo(0);
+      int exitStatus = cmd.waitFor();
       output = cmd.getProcessOutputFile();
-
       String out =
           new String(Files.readAllBytes(cmd.getProcessOutputFile()), Charset.defaultCharset());
-      Assertions.assertThat(out).isEqualToIgnoringNewLines("foo bar");
+      Assertions.assertThat(out).isEqualToIgnoringWhitespace(expectedOutput);
+      Assertions.assertThat(exitStatus).isEqualTo(0);
     }
 
     Assertions.assertThat(output).doesNotExist();
