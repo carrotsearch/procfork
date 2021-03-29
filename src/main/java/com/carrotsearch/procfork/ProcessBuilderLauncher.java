@@ -130,7 +130,7 @@ public class ProcessBuilderLauncher implements Launcher {
 
   protected List<String> shellInvokeUnixish() {
     Path cmd = Paths.get("/bin/sh");
-    if (cmd == null || !Files.isRegularFile(cmd)) {
+    if (!Files.isRegularFile(cmd)) {
       throw new RuntimeException("sh interpreter couldn't be found: " + cmd);
     }
 

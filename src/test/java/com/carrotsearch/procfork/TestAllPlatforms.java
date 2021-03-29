@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -48,6 +49,7 @@ public class TestAllPlatforms extends RandomizedTest {
     } else {
       command = cmdDir.resolve("script.sh");
       Files.write(command, "echo 1=$1 2=$2".getBytes(StandardCharsets.UTF_8));
+      Files.setPosixFilePermissions(command, PosixFilePermissions.fromString("rwx"));
       expectedOutput = "1=one and two 2=three";
     }
 
@@ -87,6 +89,7 @@ public class TestAllPlatforms extends RandomizedTest {
     } else {
       command = cmdDir.resolve("script.sh");
       Files.write(command, "echo args: $1".getBytes(StandardCharsets.UTF_8));
+      Files.setPosixFilePermissions(command, PosixFilePermissions.fromString("rwx"));
       expectedOutput = "args: ";
     }
 
