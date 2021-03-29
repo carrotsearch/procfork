@@ -49,7 +49,7 @@ public class TestAllPlatforms extends RandomizedTest {
     } else {
       command = cmdDir.resolve("script.sh");
       Files.write(command, "echo 1=$1 2=$2".getBytes(StandardCharsets.UTF_8));
-      Files.setPosixFilePermissions(command, PosixFilePermissions.fromString("u+x"));
+      Files.setPosixFilePermissions(command, PosixFilePermissions.fromString("rwxr-x---"));
       expectedOutput = "1=one and two 2=three";
     }
 
@@ -89,7 +89,7 @@ public class TestAllPlatforms extends RandomizedTest {
     } else {
       command = cmdDir.resolve("script.sh");
       Files.write(command, "echo args: $1".getBytes(StandardCharsets.UTF_8));
-      Files.setPosixFilePermissions(command, PosixFilePermissions.fromString("u+x"));
+      Files.setPosixFilePermissions(command, PosixFilePermissions.fromString("rwxr-x---"));
       expectedOutput = "args: ";
     }
 
