@@ -1,8 +1,7 @@
 
 plugins {
-  id 'com.diffplug.spotless' version "5.8.2" apply false
-  id "com.github.ben-manes.versions" version "0.36.0"
-  id "com.palantir.consistent-versions" version '1.28.0'
+  id 'com.diffplug.spotless' version "5.17.1" apply false
+  id "com.palantir.consistent-versions" version "2.5.0"
 }
 
 apply from: file('gradle/min-gradle-version.gradle')
@@ -70,7 +69,7 @@ allprojects {
       licenseHeaderFile licenseHeader
       lineEndings 'UNIX'
       endWithNewline()
-      googleJavaFormat('1.7')
+      googleJavaFormat('1.13.0')
     }
   }
 
